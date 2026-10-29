@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
-from backend.agents.classifier import EmailClassifier
+from src.agents.classifier import EmailClassifier
 from backend.agents.followup import FollowUpService
 from backend.agents.qa_agent import QAAgent
 from backend.agents.summarizer import EmailSummarizer
