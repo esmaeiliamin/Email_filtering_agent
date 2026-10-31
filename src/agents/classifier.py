@@ -26,3 +26,29 @@ Use "requires_follow_up" only when a clarifying reply is genuinely necessary.
 
 Respond with valid JSON only — no markdown fences."""
 
+def _build_prompt(email: IncomingEmail, prefs: Optional[UserPreferences]) -> str:
+    prefs_block = ""
+    if prefs:
+        if prefs.urgent_keywords:
+            prefs_block += f"\nUser flags these words as urgent: {', '.join(prefs.urgent_keywords)}"
+        if prefs.important_senders:
+            prefs_block += f"\nAlways treat mail from these senders as important: {', '.join(prefs.important_senders)}"
+        if prefs.ignore_keywords:
+            prefs_block += f"\nIgnore emails containing: {', '.join(prefs.ignore_keywords)}"
+        if prefs.custom_rules:
+            prefs_block += f"\nAdditional rules: {prefs.custom_rules}"
+
+    return f"""Classify the following email:{prefs_block}
+
+From: {email.sender_name or email.sender} <{email.sender}>
+Subject: {email.subject}
+---
+{email.body[:3000]}
+
+Respond with JSON:
+{{
+  "category": "urgent|important|requires_follow_up|ignore",
+  "reasoning": "one-sentence explanation",
+  "confidence": 0.0-1.0
+}}"""
+
