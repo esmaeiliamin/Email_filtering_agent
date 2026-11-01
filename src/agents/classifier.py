@@ -52,3 +52,38 @@ Respond with JSON:
   "confidence": 0.0-1.0
 }}"""
 
+class EmailClassifier:
+    def __init__(self, settings: Settings):
+        self.client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self.model = settings.openai_model
+
+    async def classify(
+        self,
+        email: IncomingEmail,
+        user_preferences: Optional[UserPreferences] = None,
+    ) -> ClassificationResult:
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "user", "content": _build_prompt(email, user_preferences)},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.1,
+            max_tokens=256,
+        )
+
+        raw = json.loads(response.choices[0].message.content)
+
+        try:
+            category = EmailCategory(raw["category"])
+        except (KeyError, ValueError):
+            logger.warning("Unexpected category '%s'; defaulting to ignore.", raw.get("category"))
+            category = EmailCategory.IGNORE
+
+        return ClassificationResult(
+            email_id=email.id,
+            category=category,
+            reasoning=raw.get("reasoning", ""),
+            confidence=float(raw.get("confidence", 0.8)),
+        )
