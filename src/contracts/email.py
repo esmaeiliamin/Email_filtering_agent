@@ -26,3 +26,21 @@ class IncomingEmail(BaseModel):
     thread_id: Optional[str] = None
     received_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class ClassificationResult(BaseModel):
+    email_id: str
+    category: EmailCategory
+    reasoning: str
+    confidence: float
+
+
+class ProcessEmailRequest(BaseModel):
+    email: IncomingEmail
+    user_preferences: Optional[UserPreferences] = None
+
+
+class ProcessEmailResponse(BaseModel):
+    email_id: str
+    category: EmailCategory
+    actions_taken: List[str]
+    follow_up_message: Optional[str] = None
+    summary: Optional[str] = None
