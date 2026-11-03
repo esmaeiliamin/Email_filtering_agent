@@ -10,3 +10,19 @@ class EmailCategory(str, Enum):
     IMPORTANT = "important"
     REQUIRES_FOLLOW_UP = "requires_follow_up"
     IGNORE = "ignore"
+
+class UserPreferences(BaseModel):
+    urgent_keywords: List[str] = ["urgent", "critical", "asap", "deadline", "emergency"]
+    important_senders: List[str] = []
+    ignore_keywords: List[str] = ["newsletter", "unsubscribe", "promotion", "no-reply"]
+    custom_rules: Optional[str] = None
+
+class IncomingEmail(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    sender: str
+    sender_name: Optional[str] = None
+    subject: str
+    body: str
+    thread_id: Optional[str] = None
+    received_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
