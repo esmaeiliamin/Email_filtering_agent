@@ -23,3 +23,19 @@ class ConversationSession(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     context_type: str  # "followup" or "user_query"
     email_id: Optional[str] = None
+
+class FollowUpState(BaseModel):
+    email_id: str
+    thread_id: str
+    original_email: dict
+    attempts: int = 0
+    max_attempts: int = 3
+    session_id: str
+    status: str = "active"  # active, resolved, abandoned
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class FollowUpReplyRequest(BaseModel):
+    thread_id: str
+    sender: str
+    body: str
